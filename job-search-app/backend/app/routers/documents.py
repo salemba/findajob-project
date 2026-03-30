@@ -1,7 +1,8 @@
 import os
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -9,6 +10,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models.document import Document
 from app.schemas.document import DocumentRead
+from app.services.export_service import ExportService
 
 router = APIRouter()
 
@@ -48,6 +50,35 @@ async def download_document(
         path=document.file_path,
         filename=filename,
         media_type="text/plain",
+    )
+
+
+@router.post("/{doc_id}/export")
+async def export_document(
+    doc_id: uuid.UUID,
+    format: Literal["pdf", "docx"] = Query(..., description="Export format: pdf or docx"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Export a document to PDF or DOCX and return the file."""
+    result = await db.execute(select(Document).where(Document.id == doc_id))
+    document = result.scalar_one_or_none()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    if not document.content:
+        raise HTTPException(status_code=400, detail="Document has no content to export")
+
+    svc = ExportService()
+    file_path = svc.export(document, format)
+
+    document.file_path = file_path
+    await db.flush()
+    await db.refresh(document)
+
+    filename = f"{document.type.value.lower()}_v{document.version}.{format}"
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type="application/octet-stream",
     )
 
 

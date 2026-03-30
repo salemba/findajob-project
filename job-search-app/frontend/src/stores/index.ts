@@ -1,3 +1,5 @@
-export { useJobOfferStore } from './jobOfferStore'
+export { useOffersStore } from './offersStore'
 export { useApplicationStore } from './applicationStore'
+export { useDocumentsStore } from './documentsStore'
 export { useUIStore } from './uiStore'
+export type { ModalType, Notification } from './uiStore'

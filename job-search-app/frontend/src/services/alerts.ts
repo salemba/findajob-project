@@ -1,10 +1,19 @@
 import api from './api'
-import type { Alert, AlertsSummary } from '@/types'
+import type { AlertConfig, AlertConfigCreate, AlertConfigUpdate, AlertMatch } from '@/types'
 
 export const alertsService = {
-  getAlerts: (days_ahead = 7) =>
-    api.get<Alert[]>('/alerts/', { params: { days_ahead } }).then((r) => r.data),
+  list: () =>
+    api.get<AlertConfig[]>('/alerts/').then((r) => r.data),
 
-  getSummary: () =>
-    api.get<AlertsSummary>('/alerts/summary').then((r) => r.data),
+  create: (data: AlertConfigCreate) =>
+    api.post<AlertConfig>('/alerts/', data).then((r) => r.data),
+
+  update: (id: string, data: AlertConfigUpdate) =>
+    api.put<AlertConfig>(`/alerts/${id}`, data).then((r) => r.data),
+
+  delete: (id: string) =>
+    api.delete(`/alerts/${id}`),
+
+  run: (id: string) =>
+    api.post<AlertMatch[]>(`/alerts/${id}/run`).then((r) => r.data),
 }

@@ -1,4 +1,104 @@
-export type ContractType = 'CDI' | 'CDD' | 'Freelance' | 'Intérim' | 'Alternance' | 'Stage' | 'Autre'
+// ── Enums (mirror backend Python enums) ─────────────────────────────────────
+export type OfferType   = 'FREELANCE' | 'CDI' | 'CDD'
+export type RemoteType  = 'FULL_REMOTE' | 'HYBRID' | 'ON_SITE'
+export type OfferStatus = 'NEW' | 'ANALYZED' | 'APPLIED' | 'INTERVIEW' | 'REJECTED' | 'OFFER' | 'ARCHIVED'
+
+// ── Display labels ───────────────────────────────────────────────────────────
+export const OFFER_TYPE_LABELS: Record<OfferType, string> = {
+  FREELANCE: 'Freelance',
+  CDI: 'CDI',
+  CDD: 'CDD',
+}
+export const REMOTE_TYPE_LABELS: Record<RemoteType, string> = {
+  FULL_REMOTE: 'Full remote',
+  HYBRID: 'Hybride',
+  ON_SITE: 'Présentiel',
+}
+export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
+  NEW:       'Nouveau',
+  ANALYZED:  'Analysé',
+  APPLIED:   'Candidaté',
+  INTERVIEW: 'Entretien',
+  REJECTED:  'Refusé',
+  OFFER:     'Offre reçue',
+  ARCHIVED:  'Archivé',
+}
+
+// ── Interfaces ───────────────────────────────────────────────────────────────
+export interface ScoreDetails {
+  technical_match?: number
+  experience_match?: number
+  domain_match?: number
+  salary_match?: number
+  overall_comment?: string
+  recommendation?: string
+  [key: string]: unknown
+}
+
+export interface JobOffer {
+  id: string
+  title: string
+  company: string
+  source: string
+  source_url: string | null
+  raw_text: string
+  type: OfferType
+  tjm_min: number | null
+  tjm_max: number | null
+  salary_min: number | null
+  salary_max: number | null
+  remote_type: RemoteType
+  location: string | null
+  contract_duration: string | null
+  compatibility_score: number | null
+  score_details: ScoreDetails
+  keywords: string[]
+  strengths: string[]
+  warnings: string[]
+  status: OfferStatus
+  is_favorite: boolean
+  notes: string | null
+  found_at: string
+  created_at: string
+  updated_at: string
+}
+
+export type JobOfferCreate = {
+  title: string
+  company: string
+  source: string
+  raw_text: string
+  type: OfferType
+  remote_type?: RemoteType
+  source_url?: string
+  tjm_min?: number
+  tjm_max?: number
+  salary_min?: number
+  salary_max?: number
+  location?: string
+  contract_duration?: string
+  notes?: string
+}
+
+export type JobOfferUpdate = Partial<JobOfferCreate & {
+  status?: OfferStatus
+  is_favorite?: boolean
+}>
+
+export interface JobOfferStats {
+  total: number
+  by_status: Partial<Record<OfferStatus, number>>
+  average_score: number | null
+}
+
+export interface PaginatedResponse<T> {
+  items: T[]
+  total: number
+  page: number
+  page_size: number
+  pages: number
+}
+
 export type WorkMode = 'Présentiel' | 'Télétravail' | 'Hybride'
 export type JobOfferStatus = 'Nouvelle' | 'Sauvegardée' | 'Candidatée' | 'Ignorée' | 'Expirée'
 export type SeniorityLevel = 'Junior' | 'Confirmé' | 'Senior' | 'Lead' | 'Principal' | 'Architecte' | 'Directeur'

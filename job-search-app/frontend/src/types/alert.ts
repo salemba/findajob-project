@@ -1,17 +1,41 @@
-export interface Alert {
-  type: string
-  severity: 'high' | 'medium' | 'low'
-  title: string
-  description: string
-  application_id?: string
-  job_offer_title?: string
-  company?: string
-  due_date?: string
+// ── AlertConfig (backend /api/v1/alerts/) ────────────────────────────────────
+export interface AlertConfig {
+  id: string
+  keywords: string[]
+  platforms: string[]
+  min_tjm: number | null
+  remote_only: boolean
+  is_active: boolean
+  check_interval_hours: number
+  last_checked_at: string | null
+  created_at: string
 }
 
-export interface AlertsSummary {
-  high: number
-  medium: number
-  low: number
-  total: number
+export interface AlertConfigCreate {
+  keywords?: string[]
+  platforms?: string[]
+  min_tjm?: number
+  remote_only?: boolean
+  check_interval_hours?: number
 }
+
+export interface AlertConfigUpdate {
+  keywords?: string[]
+  platforms?: string[]
+  min_tjm?: number | null
+  remote_only?: boolean
+  is_active?: boolean
+  check_interval_hours?: number
+}
+
+export interface AlertMatch {
+  id: string
+  title: string
+  company: string
+  tjm_min?: number | null
+  tjm_max?: number | null
+  remote_type?: string
+  location?: string | null
+  created_at: string
+}
+

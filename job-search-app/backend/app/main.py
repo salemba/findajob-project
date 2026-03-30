@@ -2,22 +2,35 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import job_offers, applications, documents, claude_ai, alerts
+from app.routers import job_offers, applications, documents, claude_ai, alerts, integration
+from app.services.alerts_service import AlertsService
 
 settings = get_settings()
+
+scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create tables if they don't exist (dev only; use Alembic in production)
+    # Startup
+    scheduler.add_job(
+        AlertsService().run_all_active,
+        "interval",
+        minutes=30,
+        id="check_alerts",
+        replace_existing=True,
+    )
+    scheduler.start()
     if settings.environment == "development":
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
     yield
     # Shutdown
+    scheduler.shutdown(wait=False)
     await engine.dispose()
 
 
@@ -46,6 +59,7 @@ app.include_router(applications.router, prefix="/api/v1/applications", tags=["Ap
 app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
 app.include_router(claude_ai.router, prefix="/api/v1/ai", tags=["AI"])
 app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["Alerts"])
+app.include_router(integration.router, prefix="/api/integration", tags=["Integration"])
 
 
 @app.get("/api/health", tags=["Health"])

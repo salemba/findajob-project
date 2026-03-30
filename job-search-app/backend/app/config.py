@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     # Export
     export_dir: str = "/tmp/exports"
 
+    # Integration (Claude Code)
+    integration_key: str = "change-me-integration-key-min-32-chars"
+
 
 @lru_cache
 def get_settings() -> Settings:

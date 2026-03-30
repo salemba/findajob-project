@@ -1,4 +1,5 @@
 export { jobOffersService } from './jobOffers'
+export type { JobOfferFilters } from './jobOffers'
 export { applicationsService } from './applications'
 export { documentsService } from './documents'
 export { aiService } from './ai'

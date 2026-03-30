@@ -64,10 +64,10 @@ def upgrade() -> None:
         sa.Column("raw_text", sa.Text(), nullable=False, server_default=""),
         sa.Column(
             "type",
-            sa.Enum(
+            postgresql.ENUM(
                 "FREELANCE", "CDI", "CDD",
                 name="offer_type_enum",
-                create_constraint=False,
+                create_type=False,
             ),
             nullable=False,
         ),
@@ -77,10 +77,10 @@ def upgrade() -> None:
         sa.Column("salary_max", sa.Integer(), nullable=True),
         sa.Column(
             "remote_type",
-            sa.Enum(
+            postgresql.ENUM(
                 "FULL_REMOTE", "HYBRID", "ON_SITE",
                 name="remote_type_enum",
-                create_constraint=False,
+                create_type=False,
             ),
             nullable=False,
         ),
@@ -113,11 +113,11 @@ def upgrade() -> None:
         ),
         sa.Column(
             "status",
-            sa.Enum(
+            postgresql.ENUM(
                 "NEW", "ANALYZED", "APPLIED", "INTERVIEW",
                 "REJECTED", "OFFER", "ARCHIVED",
                 name="offer_status_enum",
-                create_constraint=False,
+                create_type=False,
             ),
             nullable=False,
             server_default="NEW",
@@ -177,11 +177,11 @@ def upgrade() -> None:
         sa.Column("follow_up_date", sa.Date(), nullable=True),
         sa.Column(
             "status",
-            sa.Enum(
+            postgresql.ENUM(
                 "SENT", "VIEWED", "INTERVIEW_SCHEDULED", "INTERVIEW_DONE",
                 "REJECTED", "OFFER_RECEIVED", "ACCEPTED", "WITHDRAWN",
                 name="application_status_enum",
-                create_constraint=False,
+                create_type=False,
             ),
             nullable=False,
             server_default="SENT",
@@ -226,10 +226,10 @@ def upgrade() -> None:
         sa.Column("job_offer_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column(
             "type",
-            sa.Enum(
+            postgresql.ENUM(
                 "CV", "COVER_LETTER",
                 name="document_type_enum",
-                create_constraint=False,
+                create_type=False,
             ),
             nullable=False,
         ),

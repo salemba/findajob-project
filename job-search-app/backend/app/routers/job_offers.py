@@ -33,7 +33,7 @@ async def list_job_offers(
     search: Optional[str] = None,
     order_by: str = Query(
         "created_at",
-        pattern="^(created_at|compatibility_score|company|title|found_at)$",
+        pattern="^(created_at|updated_at|compatibility_score|company|title|found_at)$",
     ),
     order_desc: bool = True,
     db: AsyncSession = Depends(get_db),

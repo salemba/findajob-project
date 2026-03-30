@@ -8,7 +8,7 @@ import './index.css'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 2, // 2 minutes
+      staleTime: 1000 * 60 * 2,
       retry: 1,
     },
   },
@@ -23,14 +23,18 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         toastOptions={{
           duration: 3500,
           style: {
-            background: '#1e40af',
-            color: '#fff',
-            borderRadius: '8px',
+            background: '#242424',
+            color: '#ebebeb',
+            border: '1px solid #2c2c2c',
+            borderRadius: '10px',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '13px',
           },
-          success: { style: { background: '#15803d' } },
-          error: { style: { background: '#b91c1c' } },
+          success: { iconTheme: { primary: '#22c55e', secondary: '#242424' } },
+          error:   { iconTheme: { primary: '#ef4444', secondary: '#242424' } },
         }}
       />
     </QueryClientProvider>
   </React.StrictMode>
 )
+

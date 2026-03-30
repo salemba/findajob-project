@@ -1,4 +1,41 @@
-export type DocumentType = 'CV' | 'Lettre de motivation' | 'Portfolio' | 'Certificat' | 'Lettre de recommandation' | 'Autre'
+// ── Enums ────────────────────────────────────────────────────────────────────
+export type DocumentType = 'CV' | 'COVER_LETTER'
+
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  CV: 'CV',
+  COVER_LETTER: 'Lettre de motivation',
+}
+
+// ── Interface matching backend Document model ────────────────────────────────
+export interface Document {
+  id: string
+  job_offer_id: string
+  type: DocumentType
+  content: string
+  model_used: string
+  prompt_used: string | null
+  version: number
+  is_validated: boolean
+  file_path: string | null
+  created_at: string
+}
+
+export interface DocumentCreate {
+  job_offer_id: string
+  type: DocumentType
+}
+
+// ── AI generation responses (from /ai/analyze, /ai/generate-cv, etc.) ────────
+export interface AnalyzeResult {
+  job_offer_id: string
+  score: number | null
+  score_details: Record<string, unknown>
+  keywords: string[]
+  strengths: string[]
+  warnings: string[]
+  status: string
+}
+
 export type DocumentFormat = 'pdf' | 'docx' | 'html' | 'markdown' | 'txt'
 export type DocumentStatus = 'Brouillon' | 'En génération' | 'Prêt' | 'Envoyé' | 'Archivé'
 

@@ -6,6 +6,7 @@ python-multipart==0.0.12
 # Database
 sqlalchemy==2.0.36
 asyncpg==0.30.0
+aiosqlite>=0.20.0
 alembic==1.14.0
 
 # Pydantic & settings
@@ -20,6 +21,10 @@ anthropic==0.40.0
 markdown==3.7
 weasyprint==63.0  # optional: PDF export
 python-docx==1.1.2  # optional: DOCX export
+reportlab==4.2.5  # PDF generation (ATS CVs)
+
+# Scheduling
+apscheduler==3.10.4
 
 # Utils
 python-jose[cryptography]==3.3.0
