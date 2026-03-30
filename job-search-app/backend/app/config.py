@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     alert_email_to: str = ""
 
     # Export
-    export_dir: str = "/tmp/exports"
+    export_dir: str = "exports"
 
     # Integration (Claude Code)
     integration_key: str = "change-me-integration-key-min-32-chars"

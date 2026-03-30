@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +18,7 @@ scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
+    os.makedirs(settings.export_dir, exist_ok=True)
     scheduler.add_job(
         AlertsService().run_all_active,
         "interval",

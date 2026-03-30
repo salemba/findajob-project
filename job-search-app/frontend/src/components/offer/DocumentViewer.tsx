@@ -125,7 +125,13 @@ export function DocumentViewer({
               </option>
             ))}
           </select>
-          {doc && <ValidatedBadge validated={doc.is_validated} />}
+          {doc && doc.file_path && !doc.is_validated ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-mono font-medium border bg-purple-500/10 text-purple-400 border-purple-500/20">
+              🤖 Généré par agent IA
+            </span>
+          ) : doc ? (
+            <ValidatedBadge validated={doc.is_validated} />
+          ) : null}
         </div>
 
         <div className="flex-1" />
@@ -140,6 +146,17 @@ export function DocumentViewer({
             <CheckCircle2 size={13} className="text-ok" />
             Valider
           </Button>
+        )}
+        {doc?.file_path && (
+          <a
+            href={`/api/v1/documents/${doc.id}/download`}
+            download
+            className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-mono bg-surface-2 hover:bg-surface-3 text-ink-muted hover:text-ink border border-outline transition-colors"
+            title="Télécharger le fichier généré"
+          >
+            <Download size={12} />
+            Télécharger
+          </a>
         )}
         <Button
           variant="ghost" size="xs"

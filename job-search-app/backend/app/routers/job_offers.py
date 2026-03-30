@@ -24,7 +24,7 @@ class StatusUpdate(BaseModel):
 @router.get("/", response_model=dict)
 async def list_job_offers(
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(20, ge=1, le=500),
     status: Optional[OfferStatus] = None,
     remote_type: Optional[RemoteType] = None,
     type: Optional[OfferType] = None,

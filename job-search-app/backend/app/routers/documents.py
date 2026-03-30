@@ -35,22 +35,30 @@ async def download_document(
     doc_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
 ):
-    """Download a document as a file (requires file_path to be set on the document)."""
+    """Download the stored file for a document (DOCX or PDF)."""
     result = await db.execute(select(Document).where(Document.id == doc_id))
     document = result.scalar_one_or_none()
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
     if not document.file_path:
-        raise HTTPException(status_code=400, detail="No file available for this document")
+        raise HTTPException(
+            status_code=404,
+            detail="No file available — export the document first via POST /{id}/export",
+        )
     if not os.path.exists(document.file_path):
         raise HTTPException(status_code=404, detail="File not found on disk")
 
-    filename = f"{document.type.value.lower()}_v{document.version}.txt"
-    return FileResponse(
-        path=document.file_path,
-        filename=filename,
-        media_type="text/plain",
-    )
+    ext = os.path.splitext(document.file_path)[1].lower()  # '.docx' | '.pdf' | …
+    if ext == ".docx":
+        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    elif ext == ".pdf":
+        media_type = "application/pdf"
+    else:
+        media_type = "application/octet-stream"
+
+    type_slug = document.type.value.lower()  # "cv" or "cover_letter"
+    filename = f"{type_slug}_v{document.version}{ext}"
+    return FileResponse(path=document.file_path, filename=filename, media_type=media_type)
 
 
 @router.post("/{doc_id}/export")

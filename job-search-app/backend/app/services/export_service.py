@@ -13,6 +13,7 @@ CV structure produced:
   └──────────────────────────────────────────┘
 """
 import logging
+import uuid
 from pathlib import Path
 from typing import Literal
 
@@ -82,6 +83,33 @@ class ExportService:
                 self._letter_to_docx(content, str(file_path))
 
         logger.info("Exported %s → %s", document.id, file_path)
+        return str(file_path)
+
+    def generate_docx(
+        self,
+        content: str,
+        doc_type: str,
+        offer_id: uuid.UUID,
+        version: int = 1,
+    ) -> str:
+        """
+        Generate a DOCX from plain text without a DB Document object.
+        Saves to  <export_dir>/<offer_id>/<doc_type>_v<version>.docx
+        Returns the absolute file path as a string.
+
+        doc_type: ``"CV"`` | ``"COVER_LETTER"``
+        """
+        out_dir = Path(settings.export_dir) / str(offer_id)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        filename = f"{doc_type.lower()}_v{version}.docx"
+        file_path = out_dir / filename
+
+        if doc_type == "CV":
+            self._cv_to_docx(content, str(file_path))
+        else:
+            self._letter_to_docx(content, str(file_path))
+
+        logger.info("generate_docx → %s", file_path)
         return str(file_path)
 
     # ── Parsing ───────────────────────────────────────────────────────────────
