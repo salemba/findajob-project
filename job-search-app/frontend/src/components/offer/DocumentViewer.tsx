@@ -76,6 +76,24 @@ export function DocumentViewer({
     }
   }
 
+  const handleExport = async (format: 'pdf' | 'docx') => {
+    if (!doc) return
+    try {
+      const blob = await exportDocument(doc.id, format)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const typeSlug = doc.type === 'CV' ? 'cv' : 'cover_letter'
+      a.href = url
+      a.download = `${typeSlug}_v${doc.version}.${format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      toast.error(`Erreur lors de l'export ${format.toUpperCase()}`)
+    }
+  }
+
   // ── Empty state ──────────────────────────────────────────────────────────
 
   if (sorted.length === 0 && !isGenerating) {
@@ -171,7 +189,7 @@ export function DocumentViewer({
         </Button>
         <Button
           variant="ghost" size="xs"
-          onClick={() => doc && exportDocument(doc.id, 'pdf')}
+          onClick={() => handleExport('pdf')}
           title="Exporter en PDF"
         >
           <Download size={13} />
@@ -179,7 +197,7 @@ export function DocumentViewer({
         </Button>
         <Button
           variant="ghost" size="xs"
-          onClick={() => doc && exportDocument(doc.id, 'docx')}
+          onClick={() => handleExport('docx')}
           title="Exporter en DOCX"
         >
           <Download size={13} />
