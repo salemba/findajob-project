@@ -32,6 +32,7 @@ from app.models.job_offer import JobOffer, OfferStatus, OfferType, RemoteType
 from app.schemas.job_offer import JobOfferCreate
 from app.services.claude_service import ClaudeService
 from app.services.export_service import ExportService
+from app.services.scout_service import run_scout_cycle
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -342,3 +343,19 @@ async def create_integration_document(
         "document_id": str(document.id),
         "download_url": f"/api/v1/documents/{document.id}/download",
     }
+
+# \u2500\u2500 Manual scout trigger \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+
+@router.post(
+    "/scout/run-now",
+    summary="Manually trigger a scout cycle (runs in background)",
+    dependencies=[Depends(verify_integration_key)],
+)
+async def trigger_scout_now(background_tasks: BackgroundTasks) -> dict:
+    """
+    D\u00e9clenche imm\u00e9diatement un cycle de recherche d'offres sans attendre
+    le prochain tick du scheduler. Retourne instantan\u00e9ment.
+    """
+    background_tasks.add_task(run_scout_cycle)
+    return {"status": "started", "message": "Scout cycle triggered manually."}

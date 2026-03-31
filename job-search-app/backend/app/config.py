@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     # Anthropic
     anthropic_api_key: str
-    anthropic_model: str = "claude-opus-4-5"
+    anthropic_model: str = "claude-sonnet-4-6"
     anthropic_max_tokens: int = 4096
 
     # CORS

@@ -9,6 +9,7 @@ from app.config import get_settings
 from app.database import engine, Base
 from app.routers import job_offers, applications, documents, claude_ai, alerts, integration
 from app.services.alerts_service import AlertsService
+from app.services.scout_service import run_scout_cycle
 
 settings = get_settings()
 
@@ -25,6 +26,14 @@ async def lifespan(app: FastAPI):
         minutes=30,
         id="check_alerts",
         replace_existing=True,
+    )
+    scheduler.add_job(
+        run_scout_cycle,
+        trigger="interval",
+        minutes=30,
+        id="scout_cycle",
+        replace_existing=True,
+        misfire_grace_time=120,
     )
     scheduler.start()
     if settings.environment == "development":
