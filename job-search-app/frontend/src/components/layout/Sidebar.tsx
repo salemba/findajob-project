@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Briefcase, Trello, FileText, Bell, Settings,
-  Menu, X, Zap, Star,
+  Menu, X, Zap, Star, PauseCircle, PlayCircle,
 } from 'lucide-react'
 import { useUIStore } from '@/stores'
-import { useQuery } from '@tanstack/react-query'
-import { jobOffersService } from '@/services'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { jobOffersService, integrationService } from '@/services'
+import type { SchedulerStatus } from '@/services'
 import { clsx } from 'clsx'
 
 const NAV_ITEMS = [
@@ -20,6 +21,8 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useUIStore()
 
+  const queryClient = useQueryClient()
+
   const { data: stats } = useQuery({
     queryKey: ['offers-stats'],
     queryFn: jobOffersService.getStats,
@@ -27,6 +30,25 @@ export default function Sidebar() {
   })
 
   const newCount = stats?.by_status?.NEW ?? 0
+
+  const { data: schedulerData } = useQuery<SchedulerStatus>({
+    queryKey: ['scheduler-status'],
+    queryFn: integrationService.schedulerStatus,
+    refetchInterval: 1000 * 30,
+    retry: false,
+  })
+
+  const isPaused = schedulerData?.paused ?? false
+
+  const pauseMutation = useMutation({
+    mutationFn: integrationService.pauseScheduler,
+    onSuccess: (data) => queryClient.setQueryData(['scheduler-status'], data),
+  })
+
+  const resumeMutation = useMutation({
+    mutationFn: integrationService.resumeScheduler,
+    onSuccess: (data) => queryClient.setQueryData(['scheduler-status'], data),
+  })
 
   return (
     <aside
@@ -78,6 +100,28 @@ export default function Sidebar() {
           )
         })}
       </nav>
+
+      {/* Scout scheduler control */}
+      <div className="px-2 py-1.5 border-t border-outline">
+        <button
+          onClick={() => isPaused ? resumeMutation.mutate() : pauseMutation.mutate()}
+          disabled={pauseMutation.isPending || resumeMutation.isPending}
+          className={clsx(
+            'w-full flex items-center gap-2 p-2 rounded-lg text-xs font-mono transition-colors',
+            sidebarOpen ? 'justify-start' : 'justify-center',
+            isPaused
+              ? 'text-amber-400 hover:bg-amber-400/10'
+              : 'text-emerald-400 hover:bg-emerald-400/10',
+            (pauseMutation.isPending || resumeMutation.isPending) && 'opacity-50 cursor-not-allowed'
+          )}
+          title={isPaused ? 'Reprendre les agents' : 'Suspendre les agents'}
+        >
+          {isPaused ? <PlayCircle size={15} /> : <PauseCircle size={15} />}
+          {sidebarOpen && (
+            <span>{isPaused ? 'Reprendre agents' : 'Pause agents'}</span>
+          )}
+        </button>
+      </div>
 
       {/* Toggle */}
       <div className="p-2 border-t border-outline">

@@ -34,6 +34,11 @@ from app.services.claude_service import ClaudeService
 from app.services.export_service import ExportService
 from app.services.scout_service import run_scout_cycle
 
+# Imported lazily to avoid circular import at module load time
+def _get_scheduler():
+    from app.main import scheduler  # noqa: PLC0415
+    return scheduler
+
 logger = logging.getLogger(__name__)
 router = APIRouter()
 settings = get_settings()
@@ -359,3 +364,64 @@ async def trigger_scout_now(background_tasks: BackgroundTasks) -> dict:
     """
     background_tasks.add_task(run_scout_cycle)
     return {"status": "started", "message": "Scout cycle triggered manually."}
+
+
+# ── Scheduler pause / resume ──────────────────────────────────────────────────
+
+_MANAGED_JOBS = ("scout_cycle", "check_alerts")
+
+
+def _job_state(scheduler) -> dict:
+    """Return current paused/next-run info for every managed job."""
+    jobs = []
+    for job_id in _MANAGED_JOBS:
+        job = scheduler.get_job(job_id)
+        if job is None:
+            continue
+        next_run = job.next_run_time
+        jobs.append({
+            "id": job_id,
+            "paused": next_run is None,
+            "next_run": next_run.isoformat() if next_run else None,
+        })
+    all_paused = all(j["paused"] for j in jobs) if jobs else False
+    return {"paused": all_paused, "jobs": jobs}
+
+
+@router.get(
+    "/scout/scheduler-status",
+    summary="Return pause state and next-run times for managed scheduler jobs",
+    dependencies=[Depends(verify_integration_key)],
+)
+async def scheduler_status() -> dict:
+    return _job_state(_get_scheduler())
+
+
+@router.post(
+    "/scout/pause",
+    summary="Pause all periodic triggers (scout_cycle + check_alerts)",
+    dependencies=[Depends(verify_integration_key)],
+)
+async def pause_scheduler() -> dict:
+    sched = _get_scheduler()
+    for job_id in _MANAGED_JOBS:
+        job = sched.get_job(job_id)
+        if job and job.next_run_time is not None:
+            job.pause()
+            logger.info("Scheduler job paused: %s", job_id)
+    return _job_state(sched)
+
+
+@router.post(
+    "/scout/resume",
+    summary="Resume all periodic triggers",
+    dependencies=[Depends(verify_integration_key)],
+)
+async def resume_scheduler() -> dict:
+    sched = _get_scheduler()
+    for job_id in _MANAGED_JOBS:
+        job = sched.get_job(job_id)
+        if job and job.next_run_time is None:
+            job.resume()
+            logger.info("Scheduler job resumed: %s", job_id)
+    return _job_state(sched)

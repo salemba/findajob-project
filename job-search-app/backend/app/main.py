@@ -15,6 +15,9 @@ settings = get_settings()
 
 scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
+# Exported so routers can inspect/pause/resume jobs at runtime
+__all__ = ["app", "scheduler"]
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
